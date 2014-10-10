@@ -2,12 +2,10 @@
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,24 +14,28 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        private const string EXCHANGE_NAME = "directexchange1";
         private const string M_HostName = "localhost";
-        private const string QueueName = "maoyaQueue2";
-        private const string RoutingKey = "maoyaRK";
         private string hosturl = "http://localhost:15672";
         private string username;
         private string password;
-        private string exchangesApi;
-        private string queuesApi;
+        private readonly string exchangesApi;
+        private readonly string queuesApi;
+        private readonly string bingdingsApi;
         private List<ExchangeEntity> userExchanges;
         private List<QueueEntity> queues;
-        private ConnectionFactory factory;
+        private List<BindingEntity> bindings;
+        private readonly ConnectionFactory factory;
         private ExchangeEntity exchange;
         private QueueEntity queue;
+        private BindingEntity binding;
 
         public Form1()
         {
             InitializeComponent();
+            exchangesApi = hosturl + "/api/exchanges";
+            queuesApi = hosturl + "/api/queues";
+            bingdingsApi = hosturl + "/api/bindings";
+            factory = new ConnectionFactory { HostName = M_HostName };
             InitRabbit();
         }
 
@@ -42,8 +44,7 @@ namespace WindowsFormsApplication1
             username = txtUsername.Text.Trim();
             password = txtPwd.Text.Trim();
             hosturl = txtHostUrl.Text.Trim();
-            exchangesApi = hosturl + "/api/exchanges";
-            queuesApi = hosturl + "/api/queues";
+
 
             cbExchangeType.SelectedIndex = 0;
             cbDurable.SelectedIndex = 0;
@@ -54,8 +55,8 @@ namespace WindowsFormsApplication1
 
             ShowLbUserUserExchanges(exchangesApi);
             ShowLbQueues(queuesApi);
+            ShowLbBindings(bingdingsApi);
 
-            factory = new ConnectionFactory { HostName = M_HostName };
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
@@ -81,7 +82,7 @@ namespace WindowsFormsApplication1
 
         private void btnExchangesDelete_Click(object sender, EventArgs e)
         {
-            DeleteExchanges(exchangesApi);
+            DeleteExchanges();
             ShowLbUserUserExchanges(exchangesApi);
         }
 
@@ -139,7 +140,7 @@ namespace WindowsFormsApplication1
             {
                 return;
             }
-            var exchange = userExchanges.FirstOrDefault(x => x.name == lbUserExchanges.SelectedItem.ToString());
+            exchange = userExchanges.FirstOrDefault(x => x.name == lbUserExchanges.SelectedItem.ToString());
             txtSysMessage.Clear();
             if (exchange != null)
             {
@@ -192,11 +193,11 @@ namespace WindowsFormsApplication1
             {
                 return;
             }
-            var queue = queues.FirstOrDefault(x => x.name == lbQueues.SelectedItem.ToString());
+            queue = queues.FirstOrDefault(x => x.name == lbQueues.SelectedItem.ToString());
             txtSysMessage.Clear();
             if (queue != null)
             {
-                ShowSysMessage(string.Format(".Name:{0},\r\nState:{1},vhost:{2},Node:{3},Durable:{4},Auto_delete:{5},Memory:{6},Messages:{7},Messages_ready：{8},Messages_unacknowledged:{9},Idle_since:{10},Consumers:{11}\r\n",
+                ShowSysMessage(string.Format("Name:{0},\r\nState:{1},vhost:{2},Node:{3},Durable:{4},Auto_delete:{5},Memory:{6},Messages:{7},Messages_ready：{8},Messages_unacknowledged:{9},Idle_since:{10},Consumers:{11}\r\n",
                      queue.name, queue.state, queue.vhost, queue.node, queue.durable, queue.auto_delete, queue.memory, queue.messages, queue.messages_ready, queue.messages_unacknowledged, queue.idle_since, queue.consumers));
             }
             else
@@ -207,32 +208,26 @@ namespace WindowsFormsApplication1
 
         private void btnAddMessage_Click(object sender, EventArgs e)
         {
-            if (lbUserExchanges.SelectedItem == null)
+            if (CheckBind())
             {
-                ShowSysMessage("请选择用户通道");
-                return;
+                Produce(txtMessage.Text.Trim());
             }
-            if (string.IsNullOrWhiteSpace(txtSelectExchange.Text))
-            {
-                ShowSysMessage("请选择队列");
-                return;
-            }
-            Produce(txtSelectExchange.Text.Trim());
-        }
-
-        private void btnConsume_Click(object sender, EventArgs e)
-        {
-            Consume();
         }
 
         private void lbUserExchanges_SelectedIndexChanged(object sender, EventArgs e)
         {
-            txtSelectExchange.Text = lbUserExchanges.SelectedItem.ToString();
+            if (lbUserExchanges.SelectedItem != null)
+            {
+                txtSelectExchange.Text = lbUserExchanges.SelectedItem.ToString();
+            }
         }
 
         private void lbQueues_SelectedIndexChanged(object sender, EventArgs e)
         {
-            txtSelectQueue.Text = lbQueues.SelectedItem.ToString();
+            if (lbQueues.SelectedItem != null)
+            {
+                txtSelectQueue.Text = lbQueues.SelectedItem.ToString();
+            }
         }
 
         private void btnBind_Click(object sender, EventArgs e)
@@ -245,6 +240,7 @@ namespace WindowsFormsApplication1
                     {
                         channel.QueueBind(queue.name, exchange.name, txtRoutingKey.Text);
                         ShowSysMessage(string.Format("队列{0}与通道{1}绑定成功", queue.name, exchange.name));
+                        ShowLbBindings(bingdingsApi);
                     }
                 }
             }
@@ -253,6 +249,79 @@ namespace WindowsFormsApplication1
                 ShowSysMessage("未绑定成功");
             }
         }
+
+        private void btnBindingsRefresh_Click(object sender, EventArgs e)
+        {
+            ShowLbBindings(bingdingsApi);
+        }
+
+        private void btnBindingDetail_Click(object sender, EventArgs e)
+        {
+            if (lbBindings.SelectedItem == null)
+            {
+                return;
+            }
+            string bindingContent = lbBindings.SelectedItem.ToString().Replace("默认", "");
+            var attr = new Regex(@"通道:(?<1>.*?)---队列:(?<2>.*?)---Key:(?<3>.*)");
+            var mat = attr.Matches(bindingContent);
+            if (mat.Count != 0)
+            {
+                var item = mat[0];
+
+                binding = bindings.FirstOrDefault(x => x.source == item.Groups[1].ToString() && x.destination == item.Groups[2].ToString() && x.routing_key == item.Groups[3].ToString());
+                txtSysMessage.Clear();
+                if (binding != null)
+                {
+                    ShowSysMessage(string.Format("exchange:{0},\r\nqueue:{1},\r\nvhost:{2},\r\nrouting_key:{3},\r\ndestination_type:{4},\r\nproperties_key:{5}",
+                         binding.source, binding.destination, binding.vhost, binding.routing_key, binding.destination_type, binding.properties_key));
+                }
+                else
+                {
+                    ShowSysMessage("未发现该绑定关系");
+                }
+            }
+            else
+            {
+                ShowSysMessage("正则匹配失败");
+            }
+        }
+
+        private void btnRemoveBind_Click(object sender, EventArgs e)
+        {
+            if (CheckBind())
+            {
+                using (IConnection connection = factory.CreateConnection())
+                {
+                    using (IModel channel = connection.CreateModel())
+                    {
+                        channel.QueueUnbind(queue.name, exchange.name, txtRoutingKey.Text, null);
+                        ShowSysMessage(string.Format("队列{0}与通道{1}解绑成功", queue.name, exchange.name));
+                        ShowLbBindings(bingdingsApi);
+                    }
+                }
+            }
+            else
+            {
+                ShowSysMessage("未解绑成功");
+            }
+        }
+
+        private void btnReceiveMessage_Click(object sender, EventArgs e)
+        {
+            if (CheckBind())
+            {
+                ReceiveMessage();
+            }
+        }
+
+        private void btnConsumeMessage_Click(object sender, EventArgs e)
+        {
+            if (CheckBind())
+            {
+                Consume();
+            }
+        }
+
 
         private bool CheckBind()
         {
@@ -289,6 +358,29 @@ namespace WindowsFormsApplication1
 
         }
 
+        private void ReceiveMessage()
+        {
+            using (IConnection connection = factory.CreateConnection())
+            {
+                using (IModel channel = connection.CreateModel())
+                {
+                    var s = new StringBuilder();
+                    s.AppendLine("Waiting for messages");
+                    var q = channel.BasicGet(queue.name, rbAckTrue.Checked);
+                    if (q != null)
+                    {
+                        string w = Encoding.ASCII.GetString(q.Body);
+                        s.AppendLine(string.Format("队列{0}读取从通道{1}读取消息{2}", queue.name, exchange.name, w));
+                        ShowSysMessage(s.ToString());
+                    }
+                    else
+                    {
+                        ShowSysMessage("已经无消息可读取");
+                    }
+                }
+            }
+        }
+
 
         private void Consume()
         {
@@ -296,32 +388,23 @@ namespace WindowsFormsApplication1
             {
                 using (IModel channel = connection.CreateModel())
                 {
-                    channel.QueueDeclare(QueueName, true, false, false, null);
-                    channel.ExchangeDeclare(EXCHANGE_NAME, "direct");
-                    channel.QueueBind(QueueName, EXCHANGE_NAME, RoutingKey);
-
                     txtSysMessage.Text = txtSysMessage.Text + @"
 Waiting for messages";
 
                     var consumer = new QueueingBasicConsumer(channel);
-                    //channel.BasicConsume(QueueName, true, consumer);
-                    var q = channel.BasicGet(QueueName, false);
-                    string w = Encoding.ASCII.GetString(q.Body);
-                    //                    while (true)
-                    //                    {
-                    //                        var e = consumer.Queue.Dequeue();
-                    //                        txtSysMessage.Text = txtSysMessage.Text + @"
-                    //" + Encoding.ASCII.GetString(e.Body);
-                    //                        Thread.Sleep(100);
-                    //                    }
+                    channel.BasicConsume(queue.name, rbAckTrue.Checked, consumer);
+                    while (true)
+                    {
+                        var e = consumer.Queue.Dequeue();
+                        MessageBox.Show(string.Format("队列{0}获取消息{1}", queue.name, Encoding.ASCII.GetString(e.Body)));
+                        Thread.Sleep(5000);
+                    }
                 }
             }
         }
 
         public void Produce(string message)
         {
-            var exchange = userExchanges.FirstOrDefault(x => x.name == lbUserExchanges.SelectedItem.ToString());
-
             using (IConnection connection = factory.CreateConnection())
             {
                 using (IModel channel = connection.CreateModel())
@@ -329,9 +412,8 @@ Waiting for messages";
                     IBasicProperties properties = channel.CreateBasicProperties();
                     properties.SetPersistent(rbMessageDurableTrue.Checked);
 
-                    channel.ExchangeDeclare(exchange.name, exchange.type);
                     byte[] payload = Encoding.ASCII.GetBytes(message);
-                    channel.BasicPublish(exchange.name, txtRoutingKey.Text.Trim(), properties, payload);
+                    channel.BasicPublish(exchange.name, txtMessageRoutingKey.Text.Trim(), properties, payload);
 
                     txtSysMessage.Text = txtSysMessage.Text + @"
 Sent Message " + message;
@@ -343,7 +425,7 @@ Sent Message " + message;
 
         private async Task<HttpResponseMessage> ShowHttpClientResult(string Url)
         {
-            HttpClient client = new HttpClient();
+            var client = new HttpClient();
             var byteArray = Encoding.ASCII.GetBytes(string.Format("{0}:{1}", username, password));
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             HttpResponseMessage response = await client.GetAsync(Url);
@@ -382,26 +464,26 @@ Sent Message " + message;
         private async void ShowExchanges(string apiUrl)
         {
             string jsonContent = await ShowApiResult(apiUrl);
-            List<ExchangeEntity> exchanges = JsonConvert.DeserializeObject<List<ExchangeEntity>>(jsonContent);
+            var exchanges = JsonConvert.DeserializeObject<List<ExchangeEntity>>(jsonContent);
             int count = exchanges.Count;
             txtSysMessage.Clear();
-            StringBuilder s = new StringBuilder();
+            var s = new StringBuilder();
             s.AppendLine(string.Format("Exchanges Count:{0}", count));
             s.AppendLine("NameList:");
             int index = 1;
-            foreach (var exchange in exchanges)
+            foreach (var exchangeEntity in exchanges)
             {
-                s.AppendLine(index + ":" + exchange.name + "  ");
+                s.AppendLine(index + ":" + exchangeEntity.name + "  ");
                 index++;
             }
             s.AppendLine("");
             s.AppendLine("Detail:");
             index = 1;
-            foreach (var exchange in exchanges)
+            foreach (var entity in exchanges)
             {
-                if (exchange.message_stats == null) exchange.message_stats = new MessageStatsEntity();
+                if (entity.message_stats == null) entity.message_stats = new MessageStatsEntity();
                 s.AppendLine(string.Format("{0}.Name:{1},\r\nType:{2},Durable:{3},Auto_delete:{4},Internal:{5},Publish_in:{6},Publish_out：{7}\r\n",
-                    index, exchange.name, exchange.type, exchange.durable, exchange.auto_delete, exchange.internalFlag, exchange.message_stats.publish_in, exchange.message_stats.publish_out));
+                    index, entity.name, entity.type, entity.durable, entity.auto_delete, entity.internalFlag, entity.message_stats.publish_in, entity.message_stats.publish_out));
                 index++;
             }
             ShowSysMessage(s.ToString());
@@ -412,8 +494,8 @@ Sent Message " + message;
             string jsonContent = await ShowApiResult(apiUrl);
             var exchanges = JsonConvert.DeserializeObject<List<ExchangeEntity>>(jsonContent);
             var sysExchanges = (from object item in lbSysExchanges.Items select item.ToString().Trim()).ToList();
-            var userExchanges = exchanges.Where(x => !sysExchanges.Contains(x.name.Trim())).ToList();
-            return userExchanges;
+            var exchangeEntities = exchanges.Where(x => !sysExchanges.Contains(x.name.Trim())).ToList();
+            return exchangeEntities;
         }
 
         private async void ShowLbUserUserExchanges(string apiUrl)
@@ -422,28 +504,28 @@ Sent Message " + message;
             userExchanges = await GetUserExchanges(apiUrl);
             if (userExchanges != null && userExchanges.Count != 0)
             {
-                foreach (var exchange in userExchanges)
+                foreach (var entity in userExchanges)
                 {
-                    lbUserExchanges.Items.Add(exchange.name);
+                    lbUserExchanges.Items.Add(entity.name);
                 }
             }
         }
 
-        private void DeleteExchanges(string apiUrl)
+        private void DeleteExchanges()
         {
-            var userExchanges = (from object item in lbUserExchanges.Items select item.ToString().Trim()).ToList();
+            var list = (from object item in lbUserExchanges.Items select item.ToString().Trim()).ToList();
             txtSysMessage.Clear();
             var s = new StringBuilder();
-            if (userExchanges != null && userExchanges.Count != 0)
+            if (list.Count != 0)
             {
                 using (IConnection connection = factory.CreateConnection())
                 {
                     using (IModel channel = connection.CreateModel())
                     {
-                        foreach (var exchange in userExchanges)
+                        foreach (var s1 in list)
                         {
-                            channel.ExchangeDelete(exchange);
-                            s.AppendLine("已删除通道Name：" + exchange);
+                            channel.ExchangeDelete(s1);
+                            s.AppendLine("已删除通道Name：" + s1);
                         }
                     }
                 }
@@ -462,27 +544,34 @@ Sent Message " + message;
             return queues;
         }
 
+        private async Task<List<BindingEntity>> GetBindings(string apiUrl)
+        {
+            string jsonContent = await ShowApiResult(apiUrl);
+            bindings = JsonConvert.DeserializeObject<List<BindingEntity>>(jsonContent);
+            return bindings;
+        }
+
         private async void ShowAllQueues(string apiUrl)
         {
             queues = await GetQueues(apiUrl);
             int count = queues.Count;
             txtSysMessage.Clear();
-            StringBuilder s = new StringBuilder();
+            var s = new StringBuilder();
             s.AppendLine(string.Format("Queues Count:{0}", count));
             s.AppendLine("NameList:");
             int index = 1;
-            foreach (var queue in queues)
+            foreach (var queueEntity in queues)
             {
-                s.AppendLine(index + ":" + queue.name + "  ");
+                s.AppendLine(index + ":" + queueEntity.name + "  ");
                 index++;
             }
             s.AppendLine("");
             s.AppendLine("Detail:");
             index = 1;
-            foreach (var queue in queues)
+            foreach (var queueEntity in queues)
             {
                 s.AppendLine(string.Format("{0}.Name:{1},\r\nState:{2},vhost:{3},Node:{4},Durable:{5},Auto_delete:{6},Memory:{7},Messages:{8},Messages_ready：{9},Messages_unacknowledged:{10},Idle_since:{11},Consumers:{12}\r\n",
-                    index, queue.name, queue.state, queue.vhost, queue.node, queue.durable, queue.auto_delete, queue.memory, queue.messages, queue.messages_ready, queue.messages_unacknowledged, queue.idle_since, queue.consumers));
+                    index, queueEntity.name, queueEntity.state, queueEntity.vhost, queueEntity.node, queueEntity.durable, queueEntity.auto_delete, queueEntity.memory, queueEntity.messages, queueEntity.messages_ready, queueEntity.messages_unacknowledged, queueEntity.idle_since, queueEntity.consumers));
                 index++;
             }
             ShowSysMessage(s.ToString());
@@ -494,9 +583,22 @@ Sent Message " + message;
             queues = await GetQueues(apiUrl);
             if (queues != null)
             {
-                foreach (var queue in queues)
+                foreach (var queueEntity in queues)
                 {
-                    lbQueues.Items.Add(queue.name);
+                    lbQueues.Items.Add(queueEntity.name);
+                }
+            }
+        }
+
+        private async void ShowLbBindings(string apiUrl)
+        {
+            lbBindings.Items.Clear();
+            bindings = await GetBindings(apiUrl);
+            if (bindings != null)
+            {
+                foreach (var bindingEntity in bindings)
+                {
+                    lbBindings.Items.Add(string.Format("通道:{0}---队列:{1}---Key:{2}", string.IsNullOrWhiteSpace(bindingEntity.source) ? "默认" : bindingEntity.source, bindingEntity.destination, bindingEntity.routing_key));
                 }
             }
         }
@@ -504,19 +606,19 @@ Sent Message " + message;
         private async void DeleteQueues(string apiUrl)
         {
             string jsonContent = await ShowApiResult(apiUrl);
-            List<QueueEntity> queues = JsonConvert.DeserializeObject<List<QueueEntity>>(jsonContent);
+            var queueEntities = JsonConvert.DeserializeObject<List<QueueEntity>>(jsonContent);
             txtSysMessage.Clear();
-            StringBuilder s = new StringBuilder();
-            if (queues != null && queues.Count != 0)
+            var s = new StringBuilder();
+            if (queueEntities != null && queueEntities.Count != 0)
             {
                 using (IConnection connection = factory.CreateConnection())
                 {
                     using (IModel channel = connection.CreateModel())
                     {
-                        foreach (var queue in queues)
+                        foreach (var queueEntity in queueEntities)
                         {
-                            channel.QueueDelete(queue.name);
-                            s.AppendLine("已删除队列Name：" + queue.name);
+                            channel.QueueDelete(queueEntity.name);
+                            s.AppendLine("已删除队列Name：" + queueEntity.name);
                         }
                     }
                 }
@@ -531,30 +633,13 @@ Sent Message " + message;
 
         private void ShowSysMessage(string message)
         {
-            txtSysMessage.Text = txtSysMessage.Text + "\r\n" + message;
+            if (!string.IsNullOrWhiteSpace(txtSysMessage.Text))
+            {
+                txtSysMessage.Text = txtSysMessage.Text + @"
+";
+            }
+            txtSysMessage.Text = txtSysMessage.Text + message;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

@@ -32,7 +32,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.txtSelectExchange = new System.Windows.Forms.TextBox();
             this.txtSysMessage = new System.Windows.Forms.TextBox();
-            this.btnConsume = new System.Windows.Forms.Button();
             this.txtHostUrl = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -87,9 +86,11 @@
             this.lbSysExchanges = new System.Windows.Forms.ListBox();
             this.label8 = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.button4 = new System.Windows.Forms.Button();
+            this.txtMessageRoutingKey = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
+            this.btnRemoveBind = new System.Windows.Forms.Button();
             this.btnBind = new System.Windows.Forms.Button();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.txtMessage = new System.Windows.Forms.TextBox();
             this.label32 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.rbMessageDurableFalse = new System.Windows.Forms.RadioButton();
@@ -97,9 +98,9 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.rbAckFalse = new System.Windows.Forms.RadioButton();
             this.rbAckTrue = new System.Windows.Forms.RadioButton();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btnConsumeMessage = new System.Windows.Forms.Button();
             this.label28 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnReceiveMessage = new System.Windows.Forms.Button();
             this.label27 = new System.Windows.Forms.Label();
             this.txtRoutingKey = new System.Windows.Forms.TextBox();
             this.label26 = new System.Windows.Forms.Label();
@@ -109,14 +110,18 @@
             this.label23 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.label31 = new System.Windows.Forms.Label();
-            this.txtMessageRoutingKey = new System.Windows.Forms.TextBox();
-            this.label29 = new System.Windows.Forms.Label();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.btnBindingDetail = new System.Windows.Forms.Button();
+            this.btnBindingsRefresh = new System.Windows.Forms.Button();
+            this.lbBindings = new System.Windows.Forms.ListBox();
+            this.label37 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.panel5.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddMessage
@@ -151,22 +156,12 @@
             // 
             // txtSysMessage
             // 
-            this.txtSysMessage.Location = new System.Drawing.Point(12, 655);
+            this.txtSysMessage.Location = new System.Drawing.Point(617, 99);
             this.txtSysMessage.Multiline = true;
             this.txtSysMessage.Name = "txtSysMessage";
             this.txtSysMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtSysMessage.Size = new System.Drawing.Size(330, 136);
+            this.txtSysMessage.Size = new System.Drawing.Size(330, 692);
             this.txtSysMessage.TabIndex = 8;
-            // 
-            // btnConsume
-            // 
-            this.btnConsume.Location = new System.Drawing.Point(262, 138);
-            this.btnConsume.Name = "btnConsume";
-            this.btnConsume.Size = new System.Drawing.Size(93, 23);
-            this.btnConsume.TabIndex = 9;
-            this.btnConsume.Text = "消费消息";
-            this.btnConsume.UseVisualStyleBackColor = true;
-            this.btnConsume.Click += new System.EventHandler(this.btnConsume_Click);
             // 
             // txtHostUrl
             // 
@@ -695,6 +690,7 @@
             // 
             // btnRemoveSysExchanges
             // 
+            this.btnRemoveSysExchanges.Enabled = false;
             this.btnRemoveSysExchanges.Location = new System.Drawing.Point(139, 56);
             this.btnRemoveSysExchanges.Name = "btnRemoveSysExchanges";
             this.btnRemoveSysExchanges.Size = new System.Drawing.Size(51, 23);
@@ -747,15 +743,15 @@
             this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel4.Controls.Add(this.txtMessageRoutingKey);
             this.panel4.Controls.Add(this.label29);
-            this.panel4.Controls.Add(this.button4);
+            this.panel4.Controls.Add(this.btnRemoveBind);
             this.panel4.Controls.Add(this.btnBind);
-            this.panel4.Controls.Add(this.textBox2);
+            this.panel4.Controls.Add(this.txtMessage);
             this.panel4.Controls.Add(this.label32);
             this.panel4.Controls.Add(this.groupBox2);
             this.panel4.Controls.Add(this.groupBox1);
-            this.panel4.Controls.Add(this.button2);
+            this.panel4.Controls.Add(this.btnConsumeMessage);
             this.panel4.Controls.Add(this.label28);
-            this.panel4.Controls.Add(this.button1);
+            this.panel4.Controls.Add(this.btnReceiveMessage);
             this.panel4.Controls.Add(this.label27);
             this.panel4.Controls.Add(this.txtRoutingKey);
             this.panel4.Controls.Add(this.label26);
@@ -766,21 +762,37 @@
             this.panel4.Controls.Add(this.label9);
             this.panel4.Controls.Add(this.txtSelectExchange);
             this.panel4.Controls.Add(this.btnAddMessage);
-            this.panel4.Controls.Add(this.btnConsume);
             this.panel4.Controls.Add(this.label5);
             this.panel4.Location = new System.Drawing.Point(348, 403);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(255, 388);
             this.panel4.TabIndex = 23;
             // 
-            // button4
+            // txtMessageRoutingKey
             // 
-            this.button4.Location = new System.Drawing.Point(132, 111);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(103, 23);
-            this.button4.TabIndex = 54;
-            this.button4.Text = "解绑";
-            this.button4.UseVisualStyleBackColor = true;
+            this.txtMessageRoutingKey.Location = new System.Drawing.Point(132, 229);
+            this.txtMessageRoutingKey.Name = "txtMessageRoutingKey";
+            this.txtMessageRoutingKey.Size = new System.Drawing.Size(103, 21);
+            this.txtMessageRoutingKey.TabIndex = 56;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(13, 232);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(47, 12);
+            this.label29.TabIndex = 55;
+            this.label29.Text = "路由Key";
+            // 
+            // btnRemoveBind
+            // 
+            this.btnRemoveBind.Location = new System.Drawing.Point(132, 111);
+            this.btnRemoveBind.Name = "btnRemoveBind";
+            this.btnRemoveBind.Size = new System.Drawing.Size(103, 23);
+            this.btnRemoveBind.TabIndex = 54;
+            this.btnRemoveBind.Text = "解绑";
+            this.btnRemoveBind.UseVisualStyleBackColor = true;
+            this.btnRemoveBind.Click += new System.EventHandler(this.btnRemoveBind_Click);
             // 
             // btnBind
             // 
@@ -792,12 +804,12 @@
             this.btnBind.UseVisualStyleBackColor = true;
             this.btnBind.Click += new System.EventHandler(this.btnBind_Click);
             // 
-            // textBox2
+            // txtMessage
             // 
-            this.textBox2.Location = new System.Drawing.Point(132, 202);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(103, 21);
-            this.textBox2.TabIndex = 52;
+            this.txtMessage.Location = new System.Drawing.Point(132, 202);
+            this.txtMessage.Name = "txtMessage";
+            this.txtMessage.Size = new System.Drawing.Size(103, 21);
+            this.txtMessage.TabIndex = 52;
             // 
             // label32
             // 
@@ -872,14 +884,15 @@
             this.rbAckTrue.Text = "是";
             this.rbAckTrue.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // btnConsumeMessage
             // 
-            this.button2.Location = new System.Drawing.Point(132, 350);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(103, 23);
-            this.button2.TabIndex = 46;
-            this.button2.Text = "消费消息";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btnConsumeMessage.Location = new System.Drawing.Point(132, 350);
+            this.btnConsumeMessage.Name = "btnConsumeMessage";
+            this.btnConsumeMessage.Size = new System.Drawing.Size(103, 23);
+            this.btnConsumeMessage.TabIndex = 46;
+            this.btnConsumeMessage.Text = "消费消息";
+            this.btnConsumeMessage.UseVisualStyleBackColor = true;
+            this.btnConsumeMessage.Click += new System.EventHandler(this.btnConsumeMessage_Click);
             // 
             // label28
             // 
@@ -890,14 +903,15 @@
             this.label28.TabIndex = 43;
             this.label28.Text = "是否添加确认标记";
             // 
-            // button1
+            // btnReceiveMessage
             // 
-            this.button1.Location = new System.Drawing.Point(15, 350);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(103, 23);
-            this.button1.TabIndex = 42;
-            this.button1.Text = "接受消息";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnReceiveMessage.Location = new System.Drawing.Point(15, 350);
+            this.btnReceiveMessage.Name = "btnReceiveMessage";
+            this.btnReceiveMessage.Size = new System.Drawing.Size(103, 23);
+            this.btnReceiveMessage.TabIndex = 42;
+            this.btnReceiveMessage.Text = "接受消息";
+            this.btnReceiveMessage.UseVisualStyleBackColor = true;
+            this.btnReceiveMessage.Click += new System.EventHandler(this.btnReceiveMessage_Click);
             // 
             // label27
             // 
@@ -971,33 +985,71 @@
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(25, 632);
+            this.label31.Location = new System.Drawing.Point(615, 76);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(53, 12);
             this.label31.TabIndex = 45;
             this.label31.Text = "输出窗口";
             // 
-            // txtMessageRoutingKey
+            // panel5
             // 
-            this.txtMessageRoutingKey.Location = new System.Drawing.Point(132, 229);
-            this.txtMessageRoutingKey.Name = "txtMessageRoutingKey";
-            this.txtMessageRoutingKey.Size = new System.Drawing.Size(103, 21);
-            this.txtMessageRoutingKey.TabIndex = 56;
+            this.panel5.AccessibleName = "";
+            this.panel5.AllowDrop = true;
+            this.panel5.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel5.Controls.Add(this.btnBindingDetail);
+            this.panel5.Controls.Add(this.btnBindingsRefresh);
+            this.panel5.Controls.Add(this.lbBindings);
+            this.panel5.Controls.Add(this.label37);
+            this.panel5.Location = new System.Drawing.Point(12, 629);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(330, 166);
+            this.panel5.TabIndex = 46;
             // 
-            // label29
+            // btnBindingDetail
             // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(13, 232);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(47, 12);
-            this.label29.TabIndex = 55;
-            this.label29.Text = "路由Key";
+            this.btnBindingDetail.Location = new System.Drawing.Point(262, 57);
+            this.btnBindingDetail.Name = "btnBindingDetail";
+            this.btnBindingDetail.Size = new System.Drawing.Size(51, 23);
+            this.btnBindingDetail.TabIndex = 39;
+            this.btnBindingDetail.Text = "查看";
+            this.btnBindingDetail.UseVisualStyleBackColor = true;
+            this.btnBindingDetail.Click += new System.EventHandler(this.btnBindingDetail_Click);
+            // 
+            // btnBindingsRefresh
+            // 
+            this.btnBindingsRefresh.Location = new System.Drawing.Point(262, 28);
+            this.btnBindingsRefresh.Name = "btnBindingsRefresh";
+            this.btnBindingsRefresh.Size = new System.Drawing.Size(51, 23);
+            this.btnBindingsRefresh.TabIndex = 44;
+            this.btnBindingsRefresh.Text = "刷新";
+            this.btnBindingsRefresh.UseVisualStyleBackColor = true;
+            this.btnBindingsRefresh.Click += new System.EventHandler(this.btnBindingsRefresh_Click);
+            // 
+            // lbBindings
+            // 
+            this.lbBindings.FormattingEnabled = true;
+            this.lbBindings.ItemHeight = 12;
+            this.lbBindings.Location = new System.Drawing.Point(14, 28);
+            this.lbBindings.Name = "lbBindings";
+            this.lbBindings.Size = new System.Drawing.Size(235, 124);
+            this.lbBindings.TabIndex = 39;
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(12, 9);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(53, 12);
+            this.label37.TabIndex = 21;
+            this.label37.Text = "绑定关系";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(621, 803);
+            this.ClientSize = new System.Drawing.Size(959, 803);
+            this.Controls.Add(this.panel5);
             this.Controls.Add(this.label31);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel3);
@@ -1019,6 +1071,8 @@
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1030,7 +1084,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtSelectExchange;
         private System.Windows.Forms.TextBox txtSysMessage;
-        private System.Windows.Forms.Button btnConsume;
         private System.Windows.Forms.TextBox txtHostUrl;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnExchangesView;
@@ -1090,9 +1143,9 @@
         private System.Windows.Forms.ComboBox cbExchangeAutoDelete;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Label label25;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btnConsumeMessage;
         private System.Windows.Forms.Label label28;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnReceiveMessage;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.TextBox txtRoutingKey;
         private System.Windows.Forms.Label label26;
@@ -1103,12 +1156,17 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.RadioButton rbMessageDurableFalse;
         private System.Windows.Forms.RadioButton rbMessageDurableTrue;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox txtMessage;
         private System.Windows.Forms.Label label32;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button btnRemoveBind;
         private System.Windows.Forms.Button btnBind;
         private System.Windows.Forms.TextBox txtMessageRoutingKey;
         private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Button btnBindingDetail;
+        private System.Windows.Forms.Button btnBindingsRefresh;
+        private System.Windows.Forms.ListBox lbBindings;
+        private System.Windows.Forms.Label label37;
     }
 }
 
