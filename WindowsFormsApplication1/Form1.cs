@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -90,6 +91,7 @@ namespace WindowsFormsApplication1
         private void btnQueuesDelete_Click(object sender, EventArgs e)
         {
             DeleteQueues(queuesApi);
+            ShowLbBindings(bingdingsApi);
         }
 
         private void btnGetApiResult_Click(object sender, EventArgs e)
@@ -112,7 +114,7 @@ namespace WindowsFormsApplication1
             }
             if (string.IsNullOrWhiteSpace(lbSysExchanges.SelectedItem.ToString()))
             {
-                ShowSysMessage("不可删除默认通道");
+                ShowSysMessage("不可删除默认交换机");
             }
             else
             {
@@ -150,7 +152,7 @@ namespace WindowsFormsApplication1
             }
             else
             {
-                ShowSysMessage("未发现该通道");
+                ShowSysMessage("未发现该交换机");
             }
         }
 
@@ -180,6 +182,7 @@ namespace WindowsFormsApplication1
                 }
             }
             ShowLbQueues(queuesApi);
+            ShowLbBindings(bingdingsApi);
         }
 
         private void btnRefreshQueue_Click(object sender, EventArgs e)
@@ -239,7 +242,7 @@ namespace WindowsFormsApplication1
                     using (IModel channel = connection.CreateModel())
                     {
                         channel.QueueBind(queue.name, exchange.name, txtRoutingKey.Text);
-                        ShowSysMessage(string.Format("队列{0}与通道{1}绑定成功", queue.name, exchange.name));
+                        ShowSysMessage(string.Format("队列{0}与交换机{1}绑定成功", queue.name, exchange.name));
                         ShowLbBindings(bingdingsApi);
                     }
                 }
@@ -262,7 +265,7 @@ namespace WindowsFormsApplication1
                 return;
             }
             string bindingContent = lbBindings.SelectedItem.ToString().Replace("默认", "");
-            var attr = new Regex(@"通道:(?<1>.*?)---队列:(?<2>.*?)---Key:(?<3>.*)");
+            var attr = new Regex(@"交换机:(?<1>.*?)---队列:(?<2>.*?)---Key:(?<3>.*)");
             var mat = attr.Matches(bindingContent);
             if (mat.Count != 0)
             {
@@ -295,7 +298,7 @@ namespace WindowsFormsApplication1
                     using (IModel channel = connection.CreateModel())
                     {
                         channel.QueueUnbind(queue.name, exchange.name, txtRoutingKey.Text, null);
-                        ShowSysMessage(string.Format("队列{0}与通道{1}解绑成功", queue.name, exchange.name));
+                        ShowSysMessage(string.Format("队列{0}与交换机{1}解绑成功", queue.name, exchange.name));
                         ShowLbBindings(bingdingsApi);
                     }
                 }
@@ -328,7 +331,7 @@ namespace WindowsFormsApplication1
             bool checkResult = false;
             if (string.IsNullOrWhiteSpace(txtSelectExchange.Text))
             {
-                ShowSysMessage("未选择通道");
+                ShowSysMessage("未选择交换机");
             }
             else if (string.IsNullOrWhiteSpace(txtSelectQueue.Text))
             {
@@ -341,7 +344,7 @@ namespace WindowsFormsApplication1
 
                 if (exchange == null)
                 {
-                    ShowSysMessage("通道不存在");
+                    ShowSysMessage("交换机不存在");
                 }
 
                 else if (queue == null)
@@ -370,12 +373,12 @@ namespace WindowsFormsApplication1
                     if (q != null)
                     {
                         string w = Encoding.ASCII.GetString(q.Body);
-                        s.AppendLine(string.Format("队列{0}读取从通道{1}读取消息{2}", queue.name, exchange.name, w));
+                        s.AppendLine(string.Format("队列{0}读取从交换机{1}读取消息{2}", queue.name, exchange.name, w));
                         ShowSysMessage(s.ToString());
                     }
                     else
                     {
-                        ShowSysMessage("已经无消息可读取");
+                        ShowSysMessage("已经无消息可读取\r\n");
                     }
                 }
             }
@@ -392,12 +395,13 @@ namespace WindowsFormsApplication1
 Waiting for messages";
 
                     var consumer = new QueueingBasicConsumer(channel);
+                    channel.BasicQos(0, 1, false);
                     channel.BasicConsume(queue.name, rbAckTrue.Checked, consumer);
                     while (true)
                     {
                         var e = consumer.Queue.Dequeue();
-                        MessageBox.Show(string.Format("队列{0}获取消息{1}", queue.name, Encoding.ASCII.GetString(e.Body)));
-                        Thread.Sleep(5000);
+                        MessageBox.Show(string.Format("队列{0}获取消息{1},线程id为{2}", queue.name, Encoding.ASCII.GetString(e.Body), Process.GetCurrentProcess().Id));
+                        Thread.Sleep(1000);
                     }
                 }
             }
@@ -415,8 +419,8 @@ Waiting for messages";
                     byte[] payload = Encoding.ASCII.GetBytes(message);
                     channel.BasicPublish(exchange.name, txtMessageRoutingKey.Text.Trim(), properties, payload);
 
-                    txtSysMessage.Text = txtSysMessage.Text + @"
-Sent Message " + message;
+                    txtSysMessage.Text = txtSysMessage.Text + string.Format("\r\nSent Message {0} RoutingKey:{1}" ,message, txtMessageRoutingKey.Text.Trim());
+
                     Thread.Sleep(10);
                 }
             }
@@ -525,14 +529,14 @@ Sent Message " + message;
                         foreach (var s1 in list)
                         {
                             channel.ExchangeDelete(s1);
-                            s.AppendLine("已删除通道Name：" + s1);
+                            s.AppendLine("已删除交换机Name：" + s1);
                         }
                     }
                 }
             }
             else
             {
-                s.AppendLine("当前没有通道可删");
+                s.AppendLine("当前没有交换机可删");
             }
             ShowSysMessage(s.ToString());
         }
@@ -598,7 +602,7 @@ Sent Message " + message;
             {
                 foreach (var bindingEntity in bindings)
                 {
-                    lbBindings.Items.Add(string.Format("通道:{0}---队列:{1}---Key:{2}", string.IsNullOrWhiteSpace(bindingEntity.source) ? "默认" : bindingEntity.source, bindingEntity.destination, bindingEntity.routing_key));
+                    lbBindings.Items.Add(string.Format("交换机:{0}---队列:{1}---Key:{2}", string.IsNullOrWhiteSpace(bindingEntity.source) ? "默认" : bindingEntity.source, bindingEntity.destination, bindingEntity.routing_key));
                 }
             }
         }
@@ -643,3 +647,5 @@ Sent Message " + message;
 
     }
 }
+
+

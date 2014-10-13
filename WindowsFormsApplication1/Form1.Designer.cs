@@ -160,7 +160,7 @@
             this.txtSysMessage.Multiline = true;
             this.txtSysMessage.Name = "txtSysMessage";
             this.txtSysMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtSysMessage.Size = new System.Drawing.Size(330, 692);
+            this.txtSysMessage.Size = new System.Drawing.Size(330, 696);
             this.txtSysMessage.TabIndex = 8;
             // 
             // txtHostUrl
@@ -187,7 +187,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(101, 12);
             this.label5.TabIndex = 19;
-            this.label5.Text = "点击选择用户通道";
+            this.label5.Text = "选择用户exchange";
             // 
             // panel1
             // 
@@ -259,7 +259,7 @@
             this.btnExchangesDelete.Name = "btnExchangesDelete";
             this.btnExchangesDelete.Size = new System.Drawing.Size(101, 23);
             this.btnExchangesDelete.TabIndex = 23;
-            this.btnExchangesDelete.Text = "删除用户通道";
+            this.btnExchangesDelete.Text = "删除用户交换机";
             this.btnExchangesDelete.UseVisualStyleBackColor = true;
             this.btnExchangesDelete.Click += new System.EventHandler(this.btnExchangesDelete_Click);
             // 
@@ -288,7 +288,7 @@
             this.btnExchangesView.Name = "btnExchangesView";
             this.btnExchangesView.Size = new System.Drawing.Size(101, 23);
             this.btnExchangesView.TabIndex = 12;
-            this.btnExchangesView.Text = "查看所有通道";
+            this.btnExchangesView.Text = "查看所有交换机";
             this.btnExchangesView.UseVisualStyleBackColor = true;
             this.btnExchangesView.Click += new System.EventHandler(this.btnExchangesView_Click);
             // 
@@ -653,18 +653,18 @@
             this.label15.AutoSize = true;
             this.label15.Location = new System.Drawing.Point(194, 31);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(53, 12);
+            this.label15.Size = new System.Drawing.Size(77, 12);
             this.label15.TabIndex = 30;
-            this.label15.Text = "用户通道";
+            this.label15.Text = "用户exchange";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(420, 56);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(53, 12);
+            this.label14.Size = new System.Drawing.Size(29, 12);
             this.label14.TabIndex = 29;
-            this.label14.Text = "通道类型";
+            this.label14.Text = "类型";
             // 
             // cbExchangeType
             // 
@@ -684,9 +684,9 @@
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(420, 31);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(53, 12);
+            this.label13.Size = new System.Drawing.Size(65, 12);
             this.label13.TabIndex = 27;
-            this.label13.Text = "添加通道";
+            this.label13.Text = "添加交换机";
             // 
             // btnRemoveSysExchanges
             // 
@@ -704,9 +704,9 @@
             this.label11.AutoSize = true;
             this.label11.Location = new System.Drawing.Point(10, 31);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(143, 12);
+            this.label11.Size = new System.Drawing.Size(167, 12);
             this.label11.TabIndex = 25;
-            this.label11.Text = "限定通道(移除才可删除):";
+            this.label11.Text = "限定exchange(移除才可删除):";
             // 
             // lbSysExchanges
             // 
@@ -731,9 +731,9 @@
             this.label8.AutoSize = true;
             this.label8.Location = new System.Drawing.Point(10, 9);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(53, 12);
+            this.label8.Size = new System.Drawing.Size(65, 12);
             this.label8.TabIndex = 21;
-            this.label8.Text = "通道操作";
+            this.label8.Text = "交换机操作";
             // 
             // panel4
             // 
@@ -765,7 +765,7 @@
             this.panel4.Controls.Add(this.label5);
             this.panel4.Location = new System.Drawing.Point(348, 403);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(255, 388);
+            this.panel4.Size = new System.Drawing.Size(255, 392);
             this.panel4.TabIndex = 23;
             // 
             // txtMessageRoutingKey
@@ -960,9 +960,9 @@
             this.label22.AutoSize = true;
             this.label22.Location = new System.Drawing.Point(13, 60);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(77, 12);
+            this.label22.Size = new System.Drawing.Size(53, 12);
             this.label22.TabIndex = 23;
-            this.label22.Text = "点击选择队列";
+            this.label22.Text = "选择队列";
             // 
             // label23
             // 
