@@ -15,28 +15,23 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        private const string M_HostName = "localhost";
-        private string hosturl = "http://localhost:15672";
+        private string hosturl;
         private string username;
         private string password;
-        private readonly string exchangesApi;
-        private readonly string queuesApi;
-        private readonly string bingdingsApi;
+        private string exchangesApi;
+        private string queuesApi;
+        private string bingdingsApi;
         private List<ExchangeEntity> userExchanges;
         private List<QueueEntity> queues;
         private List<BindingEntity> bindings;
-        private readonly ConnectionFactory factory;
+        private ConnectionFactory factory;
         private ExchangeEntity exchange;
         private QueueEntity queue;
         private BindingEntity binding;
-
+        
         public Form1()
         {
-            InitializeComponent();
-            exchangesApi = hosturl + "/api/exchanges";
-            queuesApi = hosturl + "/api/queues";
-            bingdingsApi = hosturl + "/api/bindings";
-            factory = new ConnectionFactory { HostName = M_HostName };
+            InitializeComponent();            
             InitRabbit();
         }
 
@@ -44,8 +39,15 @@ namespace WindowsFormsApplication1
         {
             username = txtUsername.Text.Trim();
             password = txtPwd.Text.Trim();
-            hosturl = txtHostUrl.Text.Trim();
 
+            var host = txtHostUrl.Text.Trim();
+            hosturl = $"http://{host}:15672";
+
+            exchangesApi = hosturl + "/api/exchanges";
+            queuesApi = hosturl + "/api/queues";
+            bingdingsApi = hosturl + "/api/bindings";
+
+            factory = new ConnectionFactory { HostName = host };
 
             cbExchangeType.SelectedIndex = 0;
             cbDurable.SelectedIndex = 0;

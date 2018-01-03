@@ -138,7 +138,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("SimSun", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Font = new System.Drawing.Font("宋体", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(234, 22);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(129, 20);
@@ -169,7 +169,7 @@
             this.txtHostUrl.Name = "txtHostUrl";
             this.txtHostUrl.Size = new System.Drawing.Size(151, 21);
             this.txtHostUrl.TabIndex = 10;
-            this.txtHostUrl.Text = "http://localhost:15672";
+            this.txtHostUrl.Text = "localhost";
             // 
             // label2
             // 
